@@ -51,9 +51,16 @@ export async function extractTextFromPPTX(filePath) {
       });
     }
     
+    // If no text was extracted, provide a default message
+    if (!extractedText || extractedText.trim().length === 0) {
+      extractedText = 'PowerPoint presentation uploaded. No text content found in slides.';
+    }
+    
     return extractedText.trim();
   } catch (error) {
-    throw new FileProcessingError(`Failed to extract text from PPTX: ${error.message}`);
+    console.error('PPTX extraction error:', error);
+    // Return a fallback message instead of throwing an error
+    return `PowerPoint file processed. Text extraction failed: ${error.message}`;
   }
 }
 

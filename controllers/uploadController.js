@@ -72,6 +72,11 @@ export async function uploadFile(req, res, next) {
       extractedContent = `Failed to extract text from ${req.file.originalname}`;
     }
 
+    // Ensure content is not empty and has meaningful content
+    if (!extractedContent || extractedContent.trim().length === 0) {
+      extractedContent = `Document uploaded: ${req.file.originalname}. No text content could be extracted.`;
+    }
+
     // Auto-detect category if not provided or validate provided category
     let finalCategory = category;
     if (!category || category.trim() === '') {
@@ -157,25 +162,35 @@ async function extractTextFromFile(filePath, mimeType) {
       const result = await mammoth.extractRawText({ path: filePath });
       return result.value;
     } else if (mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
-      const PPTX2JSON = await import('pptx2json');
-      const pptx2json = new PPTX2JSON.default();
-      const result = await pptx2json.toJson(filePath);
-      
-      // Extract text from all slides
-      let extractedText = '';
-      if (result && result.slides) {
-        result.slides.forEach(slide => {
-          if (slide.elements) {
-            slide.elements.forEach(element => {
-              if (element.text) {
-                extractedText += element.text + ' ';
-              }
-            });
-          }
-        });
+      try {
+        const PPTX2JSON = await import('pptx2json');
+        const pptx2json = new PPTX2JSON.default();
+        const result = await pptx2json.toJson(filePath);
+        
+        // Extract text from all slides
+        let extractedText = '';
+        if (result && result.slides) {
+          result.slides.forEach(slide => {
+            if (slide.elements) {
+              slide.elements.forEach(element => {
+                if (element.text) {
+                  extractedText += element.text + ' ';
+                }
+              });
+            }
+          });
+        }
+        
+        // If no text was extracted, provide a default message
+        if (!extractedText || extractedText.trim().length === 0) {
+          extractedText = 'PowerPoint presentation uploaded. No text content found in slides.';
+        }
+        
+        return extractedText.trim();
+      } catch (pptxError) {
+        console.error('PPTX extraction error:', pptxError);
+        return `PowerPoint file processed. Text extraction failed: ${pptxError.message}`;
       }
-      
-      return extractedText.trim();
     } else if (mimeType === 'text/plain') {
       return fs.readFileSync(filePath, 'utf-8');
     } else {
