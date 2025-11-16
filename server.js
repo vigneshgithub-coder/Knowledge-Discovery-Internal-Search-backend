@@ -22,7 +22,16 @@ const port = process.env.PORT || 5000;
 // CORS configuration for production
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:5173', 'https://knowledgediscoveryinternalsearch.vercel.app/search'];
+  : [
+      'http://localhost:5173', 
+      'http://localhost:5176',
+      'https://knowledgediscoveryinternalsearch.vercel.app',
+      'https://knowledgediscoveryinternalsearch.vercel.app/',
+      'https://knowledgediscoveryinternalsearch.vercel.app/search',
+      'https://knowledgediscoveryinternalsearch.vercel.app/documents',
+      'https://knowledgediscoveryinternalsearch.vercel.app/upload',
+      'https://knowledgediscoveryinternalsearch.vercel.app/admin'
+    ];
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -31,11 +40,15 @@ app.use(cors({
     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
       callback(null, true);
     } else {
+      console.log('CORS blocked origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
