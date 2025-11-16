@@ -4,16 +4,17 @@ import { NotFoundError } from '../utils/errors.js';
 export async function listDocuments(req, res, next) {
   try {
     const { projectName } = req.query;
-    const documents = await getDocuments(projectName || null);
+    const userId = req.user?.id || req.query.userId;
+    const documents = await getDocuments(projectName || null, userId);
 
     // Convert MongoDB _id to id for frontend compatibility
     const formattedDocuments = documents.map((doc) => ({
       id: doc._id.toString(),
-      filename: doc.filename,
-      project_name: doc.project_name,
+      fileName: doc.fileName,
+      project: doc.project,
       tags: doc.tags || [],
-      file_size: doc.file_size,
-      upload_date: doc.upload_date,
+      size: doc.size,
+      createdAt: doc.createdAt,
       processed: doc.processed || false,
     }));
 

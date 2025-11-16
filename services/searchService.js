@@ -74,8 +74,18 @@ export async function searchChunks(query, projectName = null, limit = 5) {
           snippet: result.content?.substring(0, 150) || '',
         };
       } else {
-        // If document wasn't populated, we need to fetch it
-        throw new DatabaseError('Document not populated in chunk result');
+        // If document wasn't populated or doesn't exist, return chunk info without document details
+        return {
+          id: result._id?.toString() || result._id,
+          documentId: result.document_id?.toString() || 'unknown',
+          filename: 'Unknown Document',
+          projectName: 'Unknown Project',
+          tags: [],
+          content: result.content,
+          chunkIndex: result.chunk_index,
+          similarity: result.similarity,
+          snippet: result.content?.substring(0, 150) || '',
+        };
       }
     });
 

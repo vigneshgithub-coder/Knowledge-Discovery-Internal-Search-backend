@@ -70,14 +70,34 @@ export async function processDocument(documentId, filePath, mimeType, fileName) 
   }
 }
 
-export async function createDocument(fileName, projectName, tags, fileSize) {
+export async function createDocument(
+  fileName, 
+  projectName, 
+  tags, 
+  fileSize, 
+  userId, 
+  category, 
+  team, 
+  uploadedByName, 
+  uploadedByEmail, 
+  fileType, 
+  filePath, 
+  content
+) {
   try {
     const document = new Document({
-      filename: fileName,
-      project_name: projectName,
+      fileName: fileName,
+      fileType: fileType,
+      fileUrl: filePath, // Will be updated with actual URL after upload
+      fileSize: fileSize,
+      content: content,
+      category: category,
+      project: projectName,
+      team: team,
+      uploadedByName: uploadedByName,
+      uploadedByEmail: uploadedByEmail,
+      uploadedBy: userId,
       tags: tags || [],
-      file_size: fileSize,
-      upload_date: new Date(),
       processed: false,
     });
 
@@ -94,15 +114,19 @@ export async function createDocument(fileName, projectName, tags, fileSize) {
   }
 }
 
-export async function getDocuments(projectName = null) {
+export async function getDocuments(projectName = null, userId = null) {
   try {
     let query = Document.find();
 
-    if (projectName) {
-      query = query.where('project_name').equals(projectName);
+    if (userId) {
+      query = query.where('uploadedBy').equals(userId);
     }
 
-    const documents = await query.sort({ upload_date: -1 });
+    if (projectName) {
+      query = query.where('project').equals(projectName);
+    }
+
+    const documents = await query.sort({ createdAt: -1 });
 
     if (!documents) {
       throw new DatabaseError('Failed to fetch documents');

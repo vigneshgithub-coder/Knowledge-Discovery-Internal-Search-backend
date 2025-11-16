@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/knowledge-discovery';
+const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://travel-agency:Vignesh%4022@cluster0.ialfq.mongodb.net/knowledge-discovery?retryWrites=true&w=majority&appName=Cluster0';
 
 if (!mongoUri) {
   throw new Error('Missing MongoDB connection URI. Please set MONGODB_URI in your .env file');
