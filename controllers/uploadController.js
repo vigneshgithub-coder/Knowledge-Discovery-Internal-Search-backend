@@ -156,6 +156,26 @@ async function extractTextFromFile(filePath, mimeType) {
       const mammoth = await import('mammoth');
       const result = await mammoth.extractRawText({ path: filePath });
       return result.value;
+    } else if (mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+      const PPTX2JSON = await import('pptx2json');
+      const pptx2json = new PPTX2JSON.default();
+      const result = await pptx2json.toJson(filePath);
+      
+      // Extract text from all slides
+      let extractedText = '';
+      if (result && result.slides) {
+        result.slides.forEach(slide => {
+          if (slide.elements) {
+            slide.elements.forEach(element => {
+              if (element.text) {
+                extractedText += element.text + ' ';
+              }
+            });
+          }
+        });
+      }
+      
+      return extractedText.trim();
     } else if (mimeType === 'text/plain') {
       return fs.readFileSync(filePath, 'utf-8');
     } else {

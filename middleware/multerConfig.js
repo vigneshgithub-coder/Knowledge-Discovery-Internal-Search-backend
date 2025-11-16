@@ -28,6 +28,7 @@ const fileFilter = (req, file, cb) => {
   const allowedMimes = [
     'application/pdf',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     'text/plain',
   ];
 
